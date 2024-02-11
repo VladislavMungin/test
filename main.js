@@ -83,65 +83,38 @@ const api = {
     ]
 }
 
-const node = api.services.filter(item => item.node == 1).sort((item1,item2)=> item1.sorthead > item2.sorthead ? 1 : -1);
-
-const list = api.services.filter(item=>item.node == 0).sort((item1,item2)=> item1.sorthead > item2.sorthead ? 1 : -1);
-
 const container = document.querySelector('.container');
 
-node.forEach(item=>{
-    const root = document.createElement('div');
-    root.className = 'root';
+function build(nodeId){
+    const wrapper = document.createElement('div');
+    const heads = api.services.filter(item => item.head == nodeId).sort((item1,item2)=> item1.sorthead > item2.sorthead ? 1 : -1);
+    const sortApi = api.services.sort((item1,item2)=> item1.sorthead > item2.sorthead ? 1 : -1);
+    heads.forEach(head =>{
+        const ul = document.createElement('ul');
+        const liHead = document.createElement('li');
+        liHead.innerText = `${head.name} ${(head.price != 0.0) ? `(${head.price})` : ''}`;
+        ul.append(liHead);
+        sortApi.forEach(service => {
+            if(service.head == head.id){
+                if(service.node == 0){
+                    const li = document.createElement('li');
+                    li.innerText = `${service.name} ${(service.price != 0.0) ? `(${service.price})` : ''}`;
+                    liHead.append(li);
+                } else {
+                    const li = document.createElement('li');
+                    li.innerText = `${service.name} ${(service.price != 0.0) ? `(${service.price})` : ''}`;
+                    liHead.append(li);
+                    liHead.append(build(service.id));
+                }
+            }
+        })
 
-    const box = document.createElement('div');
-    box.className = 'box';
 
-    const button = document.createElement('button');
-    button.className = 'button';
-    button.innerText = '>';
-    
-    const h2 = document.createElement('h2');
-    h2.innerText = item.name;
-    
-    box.append(button);
-    box.append(h2);
-
-    const ul = document.createElement('ul');
-    
-    list.forEach(i => {
-        if(i.head == item.id){
-            const li = document.createElement('li');
-            li.innerHTML = `${i.name} - ${i.price}`;
-            ul.append(li);
-        }
+        wrapper.append(ul);
     })
-    
-    ul.classList.add('hide');
+    return wrapper;
+}
 
-    root.append(box);
-    root.append(ul);
-
-    container.append(root);
-});
-
-
-container.addEventListener('click', (e) => {
-    const target = e.target;
-
-    if (target && target.classList.contains('button')) {
-        const root = target.closest('.root');
-        const ul = root.querySelector('ul');
-
-        if (ul.classList.contains('hide')) {
-            ul.classList.remove('hide');
-            ul.classList.add('show');
-            target.classList.add('rotate');
-        } else {
-            ul.classList.remove('show');
-            ul.classList.add('hide');
-            target.classList.remove('rotate');
-        }
-    }
-});
+container.append(build(null))
 
 
